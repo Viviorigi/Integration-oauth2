@@ -1,4 +1,4 @@
-package com.duong.identityservice.repository;
+package com.duong.identityservice.repository.httpclient;
 
 import com.duong.identityservice.dto.request.ExchangeTokenRequest;
 import com.duong.identityservice.dto.response.ExchangeTokenResponse;

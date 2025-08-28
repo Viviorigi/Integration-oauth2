@@ -3,16 +3,16 @@ package com.duong.identityservice.service;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
 
+import com.duong.identityservice.constant.PredefinedRole;
 import com.duong.identityservice.dto.request.*;
-import com.duong.identityservice.dto.request.*;
-import com.duong.identityservice.repository.OutboundIdentityClient;
+import com.duong.identityservice.entity.Role;
+import com.duong.identityservice.repository.httpclient.OutboundIdentityClient;
 import com.duong.identityservice.entity.User;
 import com.duong.identityservice.exception.AppException;
 import com.duong.identityservice.exception.ErrorCode;
+import com.duong.identityservice.repository.httpclient.OutboundUserClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -44,6 +44,7 @@ public class AuthenticationService {
     UserRepository userRepository;
     InvalidatedTokenRepository invalidatedTokenRepository;
     OutboundIdentityClient outboundIdentityClient;
+    OutboundUserClient outboundUserClient;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -95,6 +96,21 @@ public class AuthenticationService {
                 .build());
 
         log.info("TOKEN_RESPONSE {}",response);
+
+        var userInfo= outboundUserClient.getUserInfo("json",response.getAccessToken());
+
+        log.info("USER_INFO {}",userInfo);
+
+        Set<Role> roles = new HashSet<>();
+        roles.add(Role.builder().name(PredefinedRole.USER_ROLE).build());
+
+        var user = userRepository.findByUsername(userInfo.getEmail()).orElseGet(
+                () -> userRepository.save(User.builder()
+                                .username(userInfo.getEmail())
+                                .firstName(userInfo.getGivenName())
+                                .lastName(userInfo.getFamilyName())
+                                .roles(roles)
+                        .build()) );
 
         return AuthenticationResponse.builder()
                 .token(response.getAccessToken())
@@ -158,7 +174,7 @@ public class AuthenticationService {
 
         JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                 .subject(user.getUsername())
-                .issuer("devteria.com")
+                .issuer("duong.com")
                 .issueTime(new Date())
                 .expirationTime(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
