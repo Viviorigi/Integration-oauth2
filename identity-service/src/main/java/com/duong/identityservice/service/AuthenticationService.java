@@ -97,12 +97,16 @@ public class AuthenticationService {
 
         log.info("TOKEN_RESPONSE {}",response);
 
+        //get user info
+
         var userInfo= outboundUserClient.getUserInfo("json",response.getAccessToken());
 
         log.info("USER_INFO {}",userInfo);
 
         Set<Role> roles = new HashSet<>();
         roles.add(Role.builder().name(PredefinedRole.USER_ROLE).build());
+
+        //onboard user
 
         var user = userRepository.findByUsername(userInfo.getEmail()).orElseGet(
                 () -> userRepository.save(User.builder()
@@ -112,8 +116,10 @@ public class AuthenticationService {
                                 .roles(roles)
                         .build()) );
 
+        var token = generateToken(user);
+
         return AuthenticationResponse.builder()
-                .token(response.getAccessToken())
+                .token(token)
                 .build();
     }
 
