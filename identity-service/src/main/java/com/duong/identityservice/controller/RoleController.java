@@ -2,7 +2,7 @@ package com.duong.identityservice.controller;
 
 import java.util.List;
 
-import com.duong.identityservice.dto.request.ApiResponse;
+import com.duong.identityservice.dto.ApiResponse;
 import com.duong.identityservice.dto.request.RoleRequest;
 import com.duong.identityservice.dto.response.RoleResponse;
 import com.duong.identityservice.service.RoleService;

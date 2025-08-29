@@ -1,4 +1,4 @@
-package com.duong.identityservice.dto.request;
+package com.duong.identityservice.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 

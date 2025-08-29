@@ -2,13 +2,15 @@ package com.duong.identityservice.controller;
 
 import java.util.List;
 
-import com.duong.identityservice.dto.request.ApiResponse;
+import com.duong.identityservice.dto.ApiResponse;
+import com.duong.identityservice.dto.request.PasswordCreationRequest;
 import com.duong.identityservice.dto.request.UserCreationRequest;
 import com.duong.identityservice.dto.request.UserUpdateRequest;
 import com.duong.identityservice.dto.response.UserResponse;
 import com.duong.identityservice.service.UserService;
 import jakarta.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import lombok.AccessLevel;
@@ -22,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class UserController {
+
     UserService userService;
 
     @PostMapping
@@ -31,6 +34,13 @@ public class UserController {
                 .build();
     }
 
+    @PostMapping("/create-password")
+    ApiResponse<Void> createPassword(@RequestBody @Valid PasswordCreationRequest request) {
+        userService.createPassword(request);
+        return ApiResponse.<Void>builder()
+                .message("Password has been created, you could use it to log-in")
+                .build();
+    }
     @GetMapping
     ApiResponse<List<UserResponse>> getUsers() {
         return ApiResponse.<List<UserResponse>>builder()

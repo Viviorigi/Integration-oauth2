@@ -1,5 +1,7 @@
 import {
+  Alert,
   Box,
+  Snackbar,
   Button,
   Card,
   CardActions,
@@ -17,7 +19,7 @@ import { getToken,setToken } from "../services/localStorageService";
 export default function Login() {
   const navigate = useNavigate();
 
-  const handleClick = () => {
+  const handleContinueWithGoogle = () => {
     const callbackUrl = OAuthConfig.redirectUri;
     const authUrl = OAuthConfig.authUri;
     const googleClientId = OAuthConfig.clientId;
@@ -41,6 +43,29 @@ export default function Login() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [snackBarOpen, setSnackBarOpen] = useState(false);
+  const [snackBarMessage, setSnackBarMessage] = useState("");
+  const [snackType, setSnackType] = useState("error");
+
+  const handleCloseSnackBar = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setSnackBarOpen(false);
+  };
+
+  const showError = (message) => {
+    setSnackType("error");
+    setSnackBarMessage(message);
+    setSnackBarOpen(true);
+  };
+
+  const showSuccess = (message) => {
+    setSnackType("success");
+    setSnackBarMessage(message);
+    setSnackBarOpen(true);
+  };
 
   const handleLogin = (event) => {
     event.preventDefault();
@@ -63,13 +88,33 @@ export default function Login() {
       .then((data) => {
         console.log(data);
 
+        if (data.code !== 1000) throw new Error(data.message);
+
         setToken(data.result?.token);
         navigate("/");
+      })
+      .catch((error) => {
+        showError(error.message);
       });
   };
 
   return (
     <>
+      <Snackbar
+        open={snackBarOpen}
+        onClose={handleCloseSnackBar}
+        autoHideDuration={6000}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          onClose={handleCloseSnackBar}
+          severity={snackType}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackBarMessage}
+        </Alert>
+      </Snackbar>
       <Box
         display="flex"
         flexDirection="column"
@@ -89,7 +134,7 @@ export default function Login() {
         >
           <CardContent>
             <Typography variant="h5" component="h1" gutterBottom>
-              Welcome to Vivior
+              Welcome to Devtetia
             </Typography>
             <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
               <TextField
@@ -128,7 +173,7 @@ export default function Login() {
                 variant="contained"
                 color="secondary"
                 size="large"
-                onClick={handleClick}
+                onClick={handleContinueWithGoogle}
                 fullWidth
                 sx={{ gap: "10px" }}
               >
